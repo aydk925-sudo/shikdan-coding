@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>식단 메모</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📝 식단 메모</h1>
+    </header>
+
+    <div class="input-area">
+      <input type="text" id="note-title" placeholder="제목 (선택)" />
+      <textarea id="note-content" placeholder="메모를 입력하세요..." rows="4"></textarea>
+      <div class="input-actions">
+        <select id="note-category">
+          <option value="일반">일반</option>
+          <option value="아침">아침</option>
+          <option value="점심">점심</option>
+          <option value="저녁">저녁</option>
+          <option value="간식">간식</option>
+        </select>
+        <button id="add-btn" onclick="addNote()">추가</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="search-input" placeholder="메모 검색..." oninput="renderNotes()" />
+      <button class="clear-btn" onclick="clearAll()">전체 삭제</button>
+    </div>
+
+    <div id="notes-container"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
