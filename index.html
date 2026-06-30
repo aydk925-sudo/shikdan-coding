@@ -7,32 +7,74 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>📝 식단 메모</h1>
-    </header>
+  <div class="app-layout">
 
-    <div class="input-area">
-      <input type="text" id="note-title" placeholder="제목 (선택)" />
-      <textarea id="note-content" placeholder="메모를 입력하세요..." rows="4"></textarea>
-      <div class="input-actions">
-        <select id="note-category">
-          <option value="일반">일반</option>
-          <option value="아침">아침</option>
-          <option value="점심">점심</option>
-          <option value="저녁">저녁</option>
-          <option value="간식">간식</option>
-        </select>
-        <button id="add-btn" onclick="addNote()">추가</button>
+    <!-- 사이드바: 폴더 목록 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span>📁 폴더</span>
+        <button onclick="openFolderModal()">+</button>
+      </div>
+      <ul id="folder-list"></ul>
+    </aside>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main">
+      <header>
+        <h1>📝 식단 메모</h1>
+      </header>
+
+      <div class="input-area">
+        <input type="text" id="note-title" placeholder="제목 (선택)" />
+        <textarea id="note-content" placeholder="메모를 입력하세요..." rows="4"></textarea>
+        <div class="input-actions">
+          <select id="note-category">
+            <option value="일반">일반</option>
+            <option value="아침">아침</option>
+            <option value="점심">점심</option>
+            <option value="저녁">저녁</option>
+            <option value="간식">간식</option>
+          </select>
+          <select id="note-folder">
+            <option value="">폴더 없음</option>
+          </select>
+          <button id="add-btn" onclick="addNote()">추가</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input type="text" id="search-input" placeholder="메모 검색..." oninput="renderNotes()" />
+        <button class="clear-btn" onclick="clearAll()">전체 삭제</button>
+      </div>
+
+      <div id="notes-container"></div>
+    </div>
+  </div>
+
+  <!-- 폴더 생성 모달 -->
+  <div id="folder-modal" class="modal-backdrop" style="display:none">
+    <div class="modal">
+      <h3>새 폴더</h3>
+      <input type="text" id="folder-name-input" placeholder="폴더 이름" />
+      <div class="modal-actions">
+        <button onclick="closeFolderModal()">취소</button>
+        <button class="primary" onclick="createFolder()">만들기</button>
       </div>
     </div>
+  </div>
 
-    <div class="toolbar">
-      <input type="text" id="search-input" placeholder="메모 검색..." oninput="renderNotes()" />
-      <button class="clear-btn" onclick="clearAll()">전체 삭제</button>
+  <!-- 메모 이동 모달 -->
+  <div id="move-modal" class="modal-backdrop" style="display:none">
+    <div class="modal">
+      <h3>폴더로 이동</h3>
+      <select id="move-folder-select">
+        <option value="">폴더 없음</option>
+      </select>
+      <div class="modal-actions">
+        <button onclick="closeMoveModal()">취소</button>
+        <button class="primary" onclick="confirmMove()">이동</button>
+      </div>
     </div>
-
-    <div id="notes-container"></div>
   </div>
 
   <script src="app.js"></script>

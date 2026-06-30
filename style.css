@@ -8,19 +8,112 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background: #f0f4f8;
   min-height: 100vh;
-  padding: 20px;
 }
 
-.container {
-  max-width: 700px;
-  margin: 0 auto;
+/* 레이아웃 */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* 사이드바 */
+.sidebar {
+  width: 220px;
+  background: #2d3748;
+  color: white;
+  padding: 20px 12px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0 4px 10px;
+  border-bottom: 1px solid #4a5568;
+}
+
+.sidebar-header button {
+  background: #667eea;
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.sidebar-header button:hover {
+  background: #5a67d8;
+}
+
+#folder-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+#folder-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: #cbd5e0;
+  transition: background 0.15s;
+}
+
+#folder-list li:hover {
+  background: #4a5568;
+}
+
+#folder-list li.active {
+  background: #667eea;
+  color: white;
+}
+
+#folder-list li .folder-count {
+  margin-left: auto;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 0.75rem;
+}
+
+#folder-list li .folder-del {
+  margin-left: 2px;
+  opacity: 0;
+  font-size: 0.75rem;
+  color: #fc8181;
+  cursor: pointer;
+}
+
+#folder-list li:hover .folder-del {
+  opacity: 1;
+}
+
+/* 메인 */
+.main {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
 }
 
 header h1 {
-  text-align: center;
-  font-size: 2rem;
+  font-size: 1.8rem;
   color: #2d3748;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .input-area {
@@ -53,8 +146,9 @@ header h1 {
 
 .input-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 select {
@@ -79,9 +173,7 @@ select {
   transition: background 0.2s;
 }
 
-#add-btn:hover {
-  background: #5a67d8;
-}
+#add-btn:hover { background: #5a67d8; }
 
 .toolbar {
   display: flex;
@@ -110,9 +202,7 @@ select {
   transition: background 0.2s;
 }
 
-.clear-btn:hover {
-  background: #e53e3e;
-}
+.clear-btn:hover { background: #e53e3e; }
 
 #notes-container {
   display: flex;
@@ -126,7 +216,6 @@ select {
   padding: 16px 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   border-left: 4px solid #667eea;
-  position: relative;
   animation: fadeIn 0.2s ease;
 }
 
@@ -135,16 +224,17 @@ select {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.note-card.아침  { border-left-color: #f6ad55; }
-.note-card.점심  { border-left-color: #68d391; }
-.note-card.저녁  { border-left-color: #76e4f7; }
-.note-card.간식  { border-left-color: #f687b3; }
+.note-card.아침 { border-left-color: #f6ad55; }
+.note-card.점심 { border-left-color: #68d391; }
+.note-card.저녁 { border-left-color: #76e4f7; }
+.note-card.간식 { border-left-color: #f687b3; }
 
 .note-header {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .note-title {
@@ -163,6 +253,15 @@ select {
   font-weight: 500;
 }
 
+.note-folder-tag {
+  font-size: 0.75rem;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: #f0fff4;
+  color: #38a169;
+  font-weight: 500;
+}
+
 .note-content {
   font-size: 0.9rem;
   color: #4a5568;
@@ -175,11 +274,32 @@ select {
   justify-content: space-between;
   align-items: center;
   margin-top: 10px;
+  gap: 8px;
 }
 
 .note-date {
   font-size: 0.75rem;
   color: #a0aec0;
+}
+
+.note-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.move-btn {
+  background: none;
+  border: 1px solid #e2e8f0;
+  color: #718096;
+  cursor: pointer;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  padding: 2px 8px;
+  transition: all 0.2s;
+}
+
+.move-btn:hover {
+  background: #edf2f7;
 }
 
 .delete-btn {
@@ -192,9 +312,7 @@ select {
   padding: 0 4px;
 }
 
-.delete-btn:hover {
-  color: #e53e3e;
-}
+.delete-btn:hover { color: #e53e3e; }
 
 .empty-msg {
   text-align: center;
@@ -202,3 +320,62 @@ select {
   padding: 40px 0;
   font-size: 0.95rem;
 }
+
+/* 모달 */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: white;
+  border-radius: 14px;
+  padding: 28px 24px;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.modal h3 {
+  font-size: 1.1rem;
+  color: #2d3748;
+}
+
+.modal input, .modal select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-actions button {
+  padding: 8px 18px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.modal-actions button.primary {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.modal-actions button.primary:hover { background: #5a67d8; }
