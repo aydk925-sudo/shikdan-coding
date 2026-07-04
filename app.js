@@ -79,7 +79,7 @@ function matchesQuery(food, q) {
   const name = food.name.toLowerCase();
   const cat  = food.category.toLowerCase();
   if (isChosungOnly(q)) {
-    return getChosung(name).includes(q);
+    return getChosung(name).startsWith(q);
   }
   return name.includes(q) || cat.includes(q);
 }
