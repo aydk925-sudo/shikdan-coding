@@ -60,15 +60,37 @@ function sumNutrients(entries) {
   return total;
 }
 
+// ── 초성 검색 ─────────────────────────────
+const CHOSUNGS = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+function getChosung(str) {
+  return [...str].map(ch => {
+    const code = ch.charCodeAt(0) - 0xAC00;
+    if (code < 0 || code > 11171) return ch;
+    return CHOSUNGS[Math.floor(code / 588)];
+  }).join('');
+}
+
+function isChosungOnly(str) {
+  return [...str].every(ch => CHOSUNGS.includes(ch));
+}
+
+function matchesQuery(food, q) {
+  const name = food.name.toLowerCase();
+  const cat  = food.category.toLowerCase();
+  if (isChosungOnly(q)) {
+    return getChosung(name).includes(q) || getChosung(cat).includes(q);
+  }
+  return name.includes(q) || cat.includes(q);
+}
+
 // ── 검색 ──────────────────────────────────
 function onSearchInput() {
   const q = document.getElementById('food-search').value.trim().toLowerCase();
   const dd = document.getElementById('search-dropdown');
   if (!q) { dd.style.display = 'none'; return; }
 
-  const results = FOODS_DB.filter(f =>
-    f.name.includes(q) || f.category.includes(q)
-  ).slice(0, 10);
+  const results = FOODS_DB.filter(f => matchesQuery(f, q)).slice(0, 10);
 
   if (!results.length) { dd.style.display = 'none'; return; }
 
