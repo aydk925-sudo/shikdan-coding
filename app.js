@@ -1,17 +1,10 @@
-const LOG_KEY     = 'shikdan_log';
-const FOLDERS_KEY = 'shikdan_folders2';
+const LOG_KEY = 'shikdan_log';
 
-let currentDate   = toDateStr(new Date());
-let activeFilter  = 'all';   // 'all' | 'meal:아침' | 'folder:id'
-let selectedFood  = null;    // FOODS_DB item
-let movingLogId   = null;
+let currentDate  = toDateStr(new Date());
+let activeFilter = 'all';  // 'all' | 'meal:아침'
+let selectedFood = null;
 
 // ── 날짜 유틸 ─────────────────────────────
-function toDateStr(d) {
-  return d.toFullYear
-    ? d.toFullYear()
-    : d.toISOString().slice(0, 10);
-}
 function toDateStr(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -31,10 +24,8 @@ function changeDate(delta) {
 }
 
 // ── 스토리지 ──────────────────────────────
-function getLog()     { return JSON.parse(localStorage.getItem(LOG_KEY)     || '[]'); }
-function saveLog(l)   { localStorage.setItem(LOG_KEY,     JSON.stringify(l)); }
-function getFolders() { return JSON.parse(localStorage.getItem(FOLDERS_KEY) || '[]'); }
-function saveFolders(f){ localStorage.setItem(FOLDERS_KEY, JSON.stringify(f)); }
+function getLog()   { return JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); }
+function saveLog(l) { localStorage.setItem(LOG_KEY, JSON.stringify(l)); }
 
 // ── 영양 계산 ─────────────────────────────
 function calcNutrients(food, grams) {
@@ -124,18 +115,16 @@ function cancelSelect() {
 // ── 음식 추가 / 삭제 ─────────────────────
 function addFood() {
   if (!selectedFood) return;
-  const grams  = parseFloat(document.getElementById('food-amount').value) || 100;
-  const meal   = document.getElementById('food-meal').value;
-  const folder = document.getElementById('food-folder-sel').value;
+  const grams = parseFloat(document.getElementById('food-amount').value) || 100;
+  const meal  = document.getElementById('food-meal').value;
 
   const log = getLog();
   log.unshift({
-    id:       Date.now(),
-    date:     currentDate,
-    food:     selectedFood,
+    id:   Date.now(),
+    date: currentDate,
+    food: selectedFood,
     grams,
     meal,
-    folderId: folder ? Number(folder) : null,
   });
   saveLog(log);
   cancelSelect();
@@ -151,11 +140,9 @@ function deleteLogEntry(id) {
 const MEAL_ICONS = { 아침:'🌅', 점심:'☀️', 저녁:'🌙', 간식:'🍪' };
 
 function renderSidebar() {
-  const log     = getLog().filter(e => e.date === currentDate);
-  const folders = getFolders();
-
-  // 식사 시간 탭
+  const log   = getLog().filter(e => e.date === currentDate);
   const meals = ['아침','점심','저녁','간식'];
+
   document.getElementById('folder-list').innerHTML =
     `<li class="${activeFilter==='all'?'active':''}" onclick="setFilter('all')">
        📋 전체 <span class="cnt">${log.length}</span>
@@ -166,51 +153,10 @@ function renderSidebar() {
         ${MEAL_ICONS[m]} ${m} <span class="cnt">${cnt}</span>
       </li>`;
     }).join('');
-
-  // 커스텀 폴더
-  const folderSel = document.getElementById('food-folder-sel');
-  const prev = folderSel.value;
-  folderSel.innerHTML = '<option value="">폴더 없음</option>' +
-    folders.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
-  folderSel.value = prev;
-
-  document.getElementById('custom-folder-list').innerHTML =
-    folders.map(f => {
-      const cnt = log.filter(e => e.folderId === f.id).length;
-      return `<li class="${activeFilter==='folder:'+f.id?'active':''}" onclick="setFilter('folder:${f.id}')">
-        📁 ${esc(f.name)} <span class="cnt">${cnt}</span>
-        <span class="folder-del" onclick="event.stopPropagation();deleteFolder(${f.id})">✕</span>
-      </li>`;
-    }).join('');
 }
 
 function setFilter(f) {
   activeFilter = f;
-  renderAll();
-}
-
-// ── 폴더 ──────────────────────────────────
-function openFolderModal() {
-  document.getElementById('folder-name-input').value = '';
-  document.getElementById('folder-modal').style.display = 'flex';
-  setTimeout(() => document.getElementById('folder-name-input').focus(), 50);
-}
-function closeFolderModal() { document.getElementById('folder-modal').style.display = 'none'; }
-function createFolder() {
-  const name = document.getElementById('folder-name-input').value.trim();
-  if (!name) return;
-  const folders = getFolders();
-  if (folders.find(f => f.name === name)) { alert('같은 이름의 폴더가 있습니다.'); return; }
-  folders.push({ id: Date.now(), name });
-  saveFolders(folders);
-  closeFolderModal();
-  renderAll();
-}
-function deleteFolder(id) {
-  if (!confirm('폴더를 삭제할까요?')) return;
-  saveFolders(getFolders().filter(f => f.id !== id));
-  saveLog(getLog().map(e => e.folderId === id ? { ...e, folderId: null } : e));
-  if (activeFilter === 'folder:' + id) activeFilter = 'all';
   renderAll();
 }
 
@@ -224,10 +170,10 @@ function renderHeader() {
   document.getElementById('daily-summary').innerHTML = log.length === 0
     ? '<span style="color:#a0aec0;font-size:0.85rem">오늘 기록된 음식이 없습니다</span>'
     : [
-        ['열량',    (total.cal  ||0).toFixed(0)+'kcal'],
-        ['탄수화물',(total.carbs||0).toFixed(1)+'g'],
+        ['열량',    (total.cal    ||0).toFixed(0)+'kcal'],
+        ['탄수화물',(total.carbs  ||0).toFixed(1)+'g'],
         ['단백질',  (total.protein||0).toFixed(1)+'g'],
-        ['지방',    (total.fat  ||0).toFixed(1)+'g'],
+        ['지방',    (total.fat    ||0).toFixed(1)+'g'],
       ].map(([l,v]) => `<div class="summary-chip"><strong>${v}</strong>${l}</div>`).join('');
 }
 
@@ -238,9 +184,6 @@ function renderLog() {
   if (activeFilter.startsWith('meal:')) {
     const m = activeFilter.slice(5);
     entries = entries.filter(e => e.meal === m);
-  } else if (activeFilter.startsWith('folder:')) {
-    const fid = Number(activeFilter.slice(7));
-    entries = entries.filter(e => e.folderId === fid);
   }
 
   const container = document.getElementById('food-log');
@@ -249,7 +192,6 @@ function renderLog() {
     return;
   }
 
-  // 식사별 그룹핑
   const groups = {};
   for (const e of entries) {
     if (!groups[e.meal]) groups[e.meal] = [];
@@ -297,9 +239,6 @@ function openNutrientModal(logId) {
   const food = entry.food;
   const n    = calcNutrients(food, entry.grams);
 
-  const driPct = v => DRI.cal ? Math.min(Math.round(v / DRI.cal * 100), 999) : 0;
-
-  // 주요 미네랄·비타민
   const detailKeys = [
     'carbs','sugar','fiber','protein','fat','satFat',
     'cholesterol','sodium','calcium','iron',
@@ -387,22 +326,14 @@ function esc(str) {
 
 // ── 초기화 ───────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // 검색창 외부 클릭 시 드롭다운 닫기
   document.addEventListener('click', e => {
     if (!e.target.closest('.search-wrap')) {
       document.getElementById('search-dropdown').style.display = 'none';
     }
   });
 
-  // Enter로 음식 추가
   document.getElementById('food-amount').addEventListener('keydown', e => {
     if (e.key === 'Enter') addFood();
-  });
-
-  // 폴더 모달 Enter/Esc
-  document.getElementById('folder-name-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') createFolder();
-    if (e.key === 'Escape') closeFolderModal();
   });
 
   renderAll();

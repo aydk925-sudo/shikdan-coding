@@ -15,10 +15,6 @@
 
       <div class="sidebar-section">식사 시간</div>
       <ul id="folder-list"></ul>
-
-      <div class="sidebar-section" style="margin-top:20px">폴더</div>
-      <ul id="custom-folder-list"></ul>
-      <button class="add-folder-btn" onclick="openFolderModal()">+ 폴더 추가</button>
     </aside>
 
     <!-- 메인 -->
@@ -49,9 +45,6 @@
               <option value="저녁">저녁</option>
               <option value="간식">간식</option>
             </select>
-            <select id="food-folder-sel">
-              <option value="">폴더 없음</option>
-            </select>
             <button class="btn-add" onclick="addFood()">추가</button>
             <button class="btn-cancel" onclick="cancelSelect()">✕</button>
           </div>
@@ -71,19 +64,7 @@
     </div>
   </div>
 
-  <!-- 폴더 생성 모달 -->
-  <div id="folder-modal" class="modal-backdrop" style="display:none">
-    <div class="modal small-modal">
-      <h3>새 폴더</h3>
-      <input type="text" id="folder-name-input" placeholder="폴더 이름" />
-      <div class="modal-actions">
-        <button onclick="closeFolderModal()">취소</button>
-        <button class="primary" onclick="createFolder()">만들기</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="foods-db.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <script src="foods-db.js?v=5"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
