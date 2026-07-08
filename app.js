@@ -219,7 +219,7 @@ function renderLog() {
               <span class="macro-pill pill-carb">탄 ${n.carbs}g</span>
               <span class="macro-pill pill-prot">단 ${n.protein}g</span>
               <span class="macro-pill pill-fat">지 ${n.fat}g</span>
-              <span class="macro-pill pill-sodium">나 ${n.sodium}mg</span>
+              <span class="macro-pill pill-sodium">나트륨 ${n.sodium}mg</span>
             </div>
             <button class="del-btn" onclick="event.stopPropagation();deleteLogEntry(${e.id})">✕</button>
           </div>`;
