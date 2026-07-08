@@ -174,6 +174,7 @@ function renderHeader() {
         ['탄수화물',(total.carbs  ||0).toFixed(1)+'g'],
         ['단백질',  (total.protein||0).toFixed(1)+'g'],
         ['지방',    (total.fat    ||0).toFixed(1)+'g'],
+        ['나트륨',  (total.sodium ||0).toFixed(0)+'mg'],
       ].map(([l,v]) => `<div class="summary-chip"><strong>${v}</strong>${l}</div>`).join('');
 }
 
