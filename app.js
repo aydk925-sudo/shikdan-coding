@@ -315,6 +315,51 @@ function closeNutrientModal(e) {
   }
 }
 
+// ── 전체 음식 목록 모달 ───────────────────
+function openFoodListModal() {
+  const catSel = document.getElementById('foodlist-cat');
+  const cats = [...new Set(FOODS_DB.map(f => f.category))].sort();
+  catSel.innerHTML = '<option value="">전체 카테고리</option>' +
+    cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('foodlist-search').value = '';
+  renderFoodList();
+  document.getElementById('foodlist-modal').style.display = 'flex';
+}
+
+function closeFoodListModal(e) {
+  if (!e || e.target.classList.contains('modal-backdrop') || e.target.classList.contains('modal-close')) {
+    document.getElementById('foodlist-modal').style.display = 'none';
+  }
+}
+
+function renderFoodList() {
+  const q   = document.getElementById('foodlist-search').value.trim().toLowerCase();
+  const cat = document.getElementById('foodlist-cat').value;
+
+  let list = FOODS_DB;
+  if (cat) list = list.filter(f => f.category === cat);
+  if (q)   list = list.filter(f => matchesQuery(f, q));
+
+  document.getElementById('foodlist-count').textContent = `총 ${list.length}개`;
+
+  document.getElementById('foodlist-body').innerHTML = list.length === 0
+    ? '<div style="text-align:center;padding:40px;color:#a0aec0">검색 결과가 없습니다</div>'
+    : list.map(f => `
+      <div class="foodlist-row" onclick="pickFromList(${f.id})">
+        <span class="foodlist-emoji">${f.emoji}</span>
+        <div class="foodlist-info">
+          <span class="foodlist-name">${esc(f.name)}</span>
+          <span class="foodlist-cat">${f.category}</span>
+        </div>
+        <span class="foodlist-cal">${f.nutrients.cal}kcal</span>
+      </div>`).join('');
+}
+
+function pickFromList(id) {
+  document.getElementById('foodlist-modal').style.display = 'none';
+  selectFood(id);
+}
+
 // ── 전체 렌더 ─────────────────────────────
 function renderAll() {
   renderHeader();

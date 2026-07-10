@@ -472,3 +472,66 @@ body {
   font-size: 0.88rem;
 }
 .modal-actions button.primary { background: #667eea; color: #fff; border-color: #667eea; }
+
+/* ── 전체 음식 목록 모달 ── */
+.foodlist-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 28px 20px;
+  width: 600px;
+  max-width: 95vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  position: relative;
+}
+.foodlist-controls {
+  display: flex;
+  gap: 8px;
+}
+.foodlist-controls input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+}
+.foodlist-controls input:focus { border-color: #667eea; }
+.foodlist-controls select {
+  padding: 8px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+}
+.foodlist-count {
+  font-size: 0.78rem;
+  color: #a0aec0;
+}
+#foodlist-body {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.foodlist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.foodlist-row:hover { background: #f7fafc; }
+.foodlist-emoji { font-size: 1.4rem; flex-shrink: 0; }
+.foodlist-info { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.foodlist-name { font-size: 0.9rem; font-weight: 600; color: #2d3748; }
+.foodlist-cat  { font-size: 0.72rem; color: #a0aec0; }
+.foodlist-cal  { font-size: 0.8rem; font-weight: 600; color: #e53e3e; flex-shrink: 0; }
