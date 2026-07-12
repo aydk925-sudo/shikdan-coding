@@ -19,6 +19,8 @@ body {
   flex-direction: column;
   gap: 4px;
   flex-shrink: 0;
+  overflow-y: auto;
+  min-height: 0;
 }
 .sidebar-title {
   font-size: 1.1rem;
