@@ -535,3 +535,25 @@ body {
 .foodlist-name { font-size: 0.9rem; font-weight: 600; color: #2d3748; }
 .foodlist-cat  { font-size: 0.72rem; color: #a0aec0; }
 .foodlist-cal  { font-size: 0.8rem; font-weight: 600; color: #e53e3e; flex-shrink: 0; }
+
+.foodlist-row.blocked .foodlist-name { color: #a0aec0; text-decoration: line-through; }
+.foodlist-row.blocked .foodlist-cal  { color: #cbd5e0; }
+.foodlist-row.blocked .foodlist-emoji { opacity: 0.4; }
+
+.bl-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.25;
+  padding: 2px 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.foodlist-row:hover .bl-btn { opacity: 0.6; }
+.bl-btn.bl-on { opacity: 1; }
+.bl-btn:hover { opacity: 1 !important; background: #fff5f5; }
+
+.bl-sidebar-btn { border-color: #fc8181 !important; color: #e53e3e !important; }
+.bl-sidebar-btn:hover { border-color: #e53e3e !important; }

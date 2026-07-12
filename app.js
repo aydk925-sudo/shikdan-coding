@@ -1,4 +1,5 @@
-const LOG_KEY = 'shikdan_log';
+const LOG_KEY       = 'shikdan_log';
+const BLACKLIST_KEY = 'shikdan_blacklist';
 
 let currentDate  = toDateStr(new Date());
 let activeFilter = 'all';  // 'all' | 'meal:아침'
@@ -24,8 +25,17 @@ function changeDate(delta) {
 }
 
 // ── 스토리지 ──────────────────────────────
-function getLog()   { return JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); }
-function saveLog(l) { localStorage.setItem(LOG_KEY, JSON.stringify(l)); }
+function getLog()          { return JSON.parse(localStorage.getItem(LOG_KEY)       || '[]'); }
+function saveLog(l)        { localStorage.setItem(LOG_KEY, JSON.stringify(l)); }
+function getBlacklist()    { return JSON.parse(localStorage.getItem(BLACKLIST_KEY) || '[]'); }
+function saveBlacklist(bl) { localStorage.setItem(BLACKLIST_KEY, JSON.stringify(bl)); }
+function isBlacklisted(id) { return getBlacklist().includes(id); }
+function toggleBlacklist(id) {
+  let bl = getBlacklist();
+  if (bl.includes(id)) bl = bl.filter(x => x !== id);
+  else bl.push(id);
+  saveBlacklist(bl);
+}
 
 // ── 영양 계산 ─────────────────────────────
 function calcNutrients(food, grams) {
@@ -81,7 +91,8 @@ function onSearchInput() {
   const dd = document.getElementById('search-dropdown');
   if (!q) { dd.style.display = 'none'; return; }
 
-  const results = FOODS_DB.filter(f => matchesQuery(f, q)).slice(0, 10);
+  const bl = getBlacklist();
+  const results = FOODS_DB.filter(f => !bl.includes(f.id) && matchesQuery(f, q)).slice(0, 10);
 
   if (!results.length) { dd.style.display = 'none'; return; }
 
@@ -335,6 +346,7 @@ function closeFoodListModal(e) {
 function renderFoodList() {
   const q   = document.getElementById('foodlist-search').value.trim().toLowerCase();
   const cat = document.getElementById('foodlist-cat').value;
+  const bl  = getBlacklist();
 
   let list = FOODS_DB;
   if (cat) list = list.filter(f => f.category === cat);
@@ -344,15 +356,49 @@ function renderFoodList() {
 
   document.getElementById('foodlist-body').innerHTML = list.length === 0
     ? '<div style="text-align:center;padding:40px;color:#a0aec0">검색 결과가 없습니다</div>'
-    : list.map(f => `
-      <div class="foodlist-row" onclick="pickFromList(${f.id})">
-        <span class="foodlist-emoji">${f.emoji}</span>
-        <div class="foodlist-info">
-          <span class="foodlist-name">${esc(f.name)}</span>
-          <span class="foodlist-cat">${f.category}</span>
-        </div>
-        <span class="foodlist-cal">${f.nutrients.cal}kcal</span>
-      </div>`).join('');
+    : list.map(f => {
+        const blocked = bl.includes(f.id);
+        return `
+          <div class="foodlist-row ${blocked ? 'blocked' : ''}">
+            <span class="foodlist-emoji">${f.emoji}</span>
+            <div class="foodlist-info" onclick="${blocked ? '' : `pickFromList(${f.id})`}" style="cursor:${blocked?'default':'pointer'};flex:1">
+              <span class="foodlist-name">${esc(f.name)}</span>
+              <span class="foodlist-cat">${f.category}</span>
+            </div>
+            <span class="foodlist-cal">${f.nutrients.cal}kcal</span>
+            <button class="bl-btn ${blocked ? 'bl-on' : ''}" onclick="toggleBlacklist(${f.id});renderFoodList()" title="${blocked ? '블랙리스트 해제' : '블랙리스트 추가'}">
+              🚫
+            </button>
+          </div>`;
+      }).join('');
+}
+
+function openBlacklistModal() {
+  renderBlacklist();
+  document.getElementById('blacklist-modal').style.display = 'flex';
+}
+function closeBlacklistModal(e) {
+  if (!e || e.target.classList.contains('modal-backdrop') || e.target.classList.contains('modal-close')) {
+    document.getElementById('blacklist-modal').style.display = 'none';
+  }
+}
+function renderBlacklist() {
+  const bl = getBlacklist();
+  const foods = bl.map(id => FOODS_DB.find(f => f.id === id)).filter(Boolean);
+  const body = document.getElementById('blacklist-body');
+  if (!foods.length) {
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:#a0aec0">블랙리스트가 비어있습니다</div>';
+    return;
+  }
+  body.innerHTML = foods.map(f => `
+    <div class="foodlist-row blocked">
+      <span class="foodlist-emoji">${f.emoji}</span>
+      <div class="foodlist-info" style="flex:1">
+        <span class="foodlist-name">${esc(f.name)}</span>
+        <span class="foodlist-cat">${f.category}</span>
+      </div>
+      <button class="bl-btn bl-on" onclick="toggleBlacklist(${f.id});renderBlacklist()" title="해제">🚫</button>
+    </div>`).join('');
 }
 
 function pickFromList(id) {

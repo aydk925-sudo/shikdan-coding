@@ -16,7 +16,10 @@
       <div class="sidebar-section">식사 시간</div>
       <ul id="folder-list"></ul>
 
-      <button class="add-folder-btn" style="margin-top:auto" onclick="openFoodListModal()">📋 전체 음식 목록</button>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px">
+        <button class="add-folder-btn" onclick="openFoodListModal()">📋 전체 음식 목록</button>
+        <button class="add-folder-btn bl-sidebar-btn" onclick="openBlacklistModal()">🚫 블랙리스트</button>
+      </div>
     </aside>
 
     <!-- 메인 -->
@@ -82,7 +85,17 @@
     </div>
   </div>
 
-  <script src="foods-db.js?v=9"></script>
-  <script src="app.js?v=9"></script>
+  <!-- 블랙리스트 모달 -->
+  <div id="blacklist-modal" class="modal-backdrop" style="display:none" onclick="closeBlacklistModal(event)">
+    <div class="modal foodlist-modal">
+      <button class="modal-close" onclick="closeBlacklistModal()">✕</button>
+      <h2 style="font-size:1.1rem;font-weight:700;color:#2d3748;margin-bottom:14px">🚫 블랙리스트</h2>
+      <p style="font-size:0.82rem;color:#a0aec0;margin-top:-8px">블랙리스트에 추가된 음식은 검색에 나타나지 않습니다. 🚫 버튼을 눌러 해제하세요.</p>
+      <div id="blacklist-body" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+  </div>
+
+  <script src="foods-db.js?v=10"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
