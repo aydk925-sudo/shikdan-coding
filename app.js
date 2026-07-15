@@ -232,6 +232,7 @@ function renderLog() {
               <span class="macro-pill pill-fat">지 ${n.fat}g</span>
               <span class="macro-pill pill-sodium">나트륨 ${n.sodium}mg</span>
             </div>
+            <button class="recipe-btn" onclick="event.stopPropagation();openRecipeModal('${esc(e.food.name)}')" title="레시피 보기">📖</button>
             <button class="del-btn" onclick="event.stopPropagation();deleteLogEntry(${e.id})">✕</button>
           </div>`;
       }).join('');
@@ -399,6 +400,48 @@ function renderBlacklist() {
       </div>
       <button class="bl-btn bl-on" onclick="toggleBlacklist(${f.id});renderBlacklist()" title="해제">🚫</button>
     </div>`).join('');
+}
+
+// ── 레시피 모달 ──────────────────────────
+function openRecipeModal(foodName) {
+  const recipe = RECIPES[foodName];
+  const modal  = document.getElementById('recipe-modal');
+
+  if (!recipe) {
+    const searchUrl = 'https://www.10000recipe.com/recipe/list.html?q=' + encodeURIComponent(foodName);
+    document.getElementById('recipe-content').innerHTML = `
+      <div class="recipe-header">
+        <div class="recipe-food-name">${esc(foodName)}</div>
+      </div>
+      <div class="recipe-no-data">
+        <p>등록된 레시피가 없습니다.</p>
+        <a href="${searchUrl}" target="_blank" class="recipe-link-btn">🔍 만개의레시피에서 검색하기</a>
+      </div>`;
+  } else {
+    const ingHtml = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
+    const stepHtml = recipe.steps.map((s, i) => `
+      <div class="recipe-step">
+        <span class="step-num">${i + 1}</span>
+        <span class="step-text">${s}</span>
+      </div>`).join('');
+    document.getElementById('recipe-content').innerHTML = `
+      <div class="recipe-header">
+        <div class="recipe-food-name">${esc(foodName)}</div>
+      </div>
+      <div class="recipe-section-title">🥬 재료</div>
+      <ul class="recipe-ingredients">${ingHtml}</ul>
+      <div class="recipe-section-title">👨‍🍳 조리 순서</div>
+      <div class="recipe-steps">${stepHtml}</div>
+      <a href="${recipe.source.url}" target="_blank" class="recipe-link-btn">🔗 ${recipe.source.name}에서 원본 레시피 보기</a>`;
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeRecipeModal(e) {
+  if (!e || e.target.classList.contains('modal-backdrop') || e.target.classList.contains('modal-close')) {
+    document.getElementById('recipe-modal').style.display = 'none';
+  }
 }
 
 function pickFromList(id) {

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>식단 기록</title>
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <div class="app-layout">
@@ -85,6 +85,14 @@
     </div>
   </div>
 
+  <!-- 레시피 모달 -->
+  <div id="recipe-modal" class="modal-backdrop" style="display:none" onclick="closeRecipeModal(event)">
+    <div class="modal recipe-modal">
+      <button class="modal-close" onclick="closeRecipeModal()">✕</button>
+      <div id="recipe-content"></div>
+    </div>
+  </div>
+
   <!-- 블랙리스트 모달 -->
   <div id="blacklist-modal" class="modal-backdrop" style="display:none" onclick="closeBlacklistModal(event)">
     <div class="modal foodlist-modal">
@@ -96,6 +104,7 @@
   </div>
 
   <script src="foods-db.js?v=11"></script>
-  <script src="app.js?v=11"></script>
+  <script src="recipes.js?v=1"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
