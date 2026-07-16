@@ -582,6 +582,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
 }
 .recipe-header { margin-bottom: 14px; }
 .recipe-food-name { font-size: 1.2rem; font-weight: 700; color: #2d3748; }
