@@ -1,5 +1,6 @@
-const LOG_KEY       = 'shikdan_log';
-const BLACKLIST_KEY = 'shikdan_blacklist';
+const LOG_KEY           = 'shikdan_log';
+const BLACKLIST_KEY     = 'shikdan_blacklist';
+const BLACKLIST_CAT_KEY = 'shikdan_blacklist_cat';
 
 let currentDate  = toDateStr(new Date());
 let activeFilter = 'all';  // 'all' | 'meal:아침'
@@ -27,14 +28,26 @@ function changeDate(delta) {
 // ── 스토리지 ──────────────────────────────
 function getLog()          { return JSON.parse(localStorage.getItem(LOG_KEY)       || '[]'); }
 function saveLog(l)        { localStorage.setItem(LOG_KEY, JSON.stringify(l)); }
-function getBlacklist()    { return JSON.parse(localStorage.getItem(BLACKLIST_KEY) || '[]'); }
-function saveBlacklist(bl) { localStorage.setItem(BLACKLIST_KEY, JSON.stringify(bl)); }
-function isBlacklisted(id) { return getBlacklist().includes(id); }
+function getBlacklist()       { return JSON.parse(localStorage.getItem(BLACKLIST_KEY)     || '[]'); }
+function saveBlacklist(bl)    { localStorage.setItem(BLACKLIST_KEY, JSON.stringify(bl)); }
+function getCatBlacklist()    { return JSON.parse(localStorage.getItem(BLACKLIST_CAT_KEY) || '[]'); }
+function saveCatBlacklist(bl) { localStorage.setItem(BLACKLIST_CAT_KEY, JSON.stringify(bl)); }
+function isBlacklisted(id) {
+  if (getBlacklist().includes(id)) return true;
+  const food = FOODS_DB.find(f => f.id === id);
+  return food ? getCatBlacklist().includes(food.category) : false;
+}
 function toggleBlacklist(id) {
   let bl = getBlacklist();
   if (bl.includes(id)) bl = bl.filter(x => x !== id);
   else bl.push(id);
   saveBlacklist(bl);
+}
+function toggleCatBlacklist(cat) {
+  let bl = getCatBlacklist();
+  if (bl.includes(cat)) bl = bl.filter(x => x !== cat);
+  else bl.push(cat);
+  saveCatBlacklist(bl);
 }
 
 // ── 영양 계산 ─────────────────────────────
@@ -374,6 +387,8 @@ function renderFoodList() {
       }).join('');
 }
 
+let blTab = 'food'; // 'food' | 'category'
+
 function openBlacklistModal() {
   renderBlacklist();
   document.getElementById('blacklist-modal').style.display = 'flex';
@@ -383,23 +398,50 @@ function closeBlacklistModal(e) {
     document.getElementById('blacklist-modal').style.display = 'none';
   }
 }
+function switchBlTab(tab) {
+  blTab = tab;
+  renderBlacklist();
+}
 function renderBlacklist() {
-  const bl = getBlacklist();
-  const foods = bl.map(id => FOODS_DB.find(f => f.id === id)).filter(Boolean);
   const body = document.getElementById('blacklist-body');
-  if (!foods.length) {
-    body.innerHTML = '<div style="text-align:center;padding:40px;color:#a0aec0">블랙리스트가 비어있습니다</div>';
-    return;
+  const tabHtml = `
+    <div class="bl-tabs">
+      <button class="bl-tab${blTab==='food'?' active':''}" onclick="switchBlTab('food')">개별 음식</button>
+      <button class="bl-tab${blTab==='category'?' active':''}" onclick="switchBlTab('category')">카테고리</button>
+    </div>`;
+
+  if (blTab === 'food') {
+    const bl = getBlacklist();
+    const foods = bl.map(id => FOODS_DB.find(f => f.id === id)).filter(Boolean);
+    const listHtml = foods.length
+      ? foods.map(f => `
+          <div class="foodlist-row blocked">
+            <span class="foodlist-emoji">${f.emoji}</span>
+            <div class="foodlist-info" style="flex:1">
+              <span class="foodlist-name">${esc(f.name)}</span>
+              <span class="foodlist-cat">${f.category}</span>
+            </div>
+            <button class="bl-btn bl-on" onclick="toggleBlacklist(${f.id});renderBlacklist()" title="해제">🚫</button>
+          </div>`).join('')
+      : '<div style="text-align:center;padding:32px;color:#a0aec0">차단된 음식이 없습니다</div>';
+    body.innerHTML = tabHtml + listHtml;
+  } else {
+    const cats = [...new Set(FOODS_DB.map(f => f.category))].sort();
+    const catBl = getCatBlacklist();
+    const listHtml = cats.map(cat => {
+      const blocked = catBl.includes(cat);
+      const count = FOODS_DB.filter(f => f.category === cat).length;
+      return `
+        <div class="foodlist-row${blocked?' blocked':''}">
+          <div class="foodlist-info" style="flex:1">
+            <span class="foodlist-name">${esc(cat)}</span>
+            <span class="foodlist-cat">${count}개 음식</span>
+          </div>
+          <button class="bl-btn${blocked?' bl-on':''}" onclick="toggleCatBlacklist('${esc(cat)}');renderBlacklist()" title="${blocked?'해제':'차단'}">🚫</button>
+        </div>`;
+    }).join('');
+    body.innerHTML = tabHtml + '<div style="font-size:0.78rem;color:#a0aec0;padding:6px 2px 10px">카테고리 차단 시 해당 카테고리의 모든 음식이 검색에서 제외됩니다.</div>' + listHtml;
   }
-  body.innerHTML = foods.map(f => `
-    <div class="foodlist-row blocked">
-      <span class="foodlist-emoji">${f.emoji}</span>
-      <div class="foodlist-info" style="flex:1">
-        <span class="foodlist-name">${esc(f.name)}</span>
-        <span class="foodlist-cat">${f.category}</span>
-      </div>
-      <button class="bl-btn bl-on" onclick="toggleBlacklist(${f.id});renderBlacklist()" title="해제">🚫</button>
-    </div>`).join('');
 }
 
 // ── 레시피 모달 ──────────────────────────
