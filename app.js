@@ -388,6 +388,7 @@ function renderFoodList() {
 }
 
 let blTab = 'food'; // 'food' | 'category'
+let blCatFilter = ''; // 개별 음식 탭 카테고리 필터
 
 function openBlacklistModal() {
   renderBlacklist();
@@ -412,7 +413,13 @@ function renderBlacklist() {
 
   if (blTab === 'food') {
     const bl = getBlacklist();
-    const foods = bl.map(id => FOODS_DB.find(f => f.id === id)).filter(Boolean);
+    let foods = bl.map(id => FOODS_DB.find(f => f.id === id)).filter(Boolean);
+    const allCats = [...new Set(foods.map(f => f.category))].sort();
+    const catOptions = ['<option value="">전체 카테고리</option>',
+      ...allCats.map(c => `<option value="${esc(c)}"${blCatFilter===c?' selected':''}>${esc(c)}</option>`)
+    ].join('');
+    const filterHtml = `<select class="bl-cat-filter" onchange="blCatFilter=this.value;renderBlacklist()">${catOptions}</select>`;
+    if (blCatFilter) foods = foods.filter(f => f.category === blCatFilter);
     const listHtml = foods.length
       ? foods.map(f => `
           <div class="foodlist-row blocked">
@@ -424,7 +431,7 @@ function renderBlacklist() {
             <button class="bl-btn bl-on" onclick="toggleBlacklist(${f.id});renderBlacklist()" title="해제">🚫</button>
           </div>`).join('')
       : '<div style="text-align:center;padding:32px;color:#a0aec0">차단된 음식이 없습니다</div>';
-    body.innerHTML = tabHtml + listHtml;
+    body.innerHTML = tabHtml + filterHtml + listHtml;
   } else {
     const cats = [...new Set(FOODS_DB.map(f => f.category))].sort();
     const catBl = getCatBlacklist();
