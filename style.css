@@ -587,6 +587,33 @@ body {
   border-color: #fc8181;
   color: #e53e3e;
 }
+.bl-kw-input-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.bl-kw-input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  color: #2d3748;
+  background: #f7fafc;
+}
+.bl-kw-input:focus { outline: none; border-color: #fc8181; }
+.bl-kw-add-btn {
+  padding: 7px 14px;
+  background: #e53e3e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bl-kw-add-btn:hover { background: #c53030; }
+
 .bl-cat-filter {
   width: 100%;
   margin-bottom: 10px;

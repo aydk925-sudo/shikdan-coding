@@ -1,6 +1,7 @@
 const LOG_KEY           = 'shikdan_log';
 const BLACKLIST_KEY     = 'shikdan_blacklist';
 const BLACKLIST_CAT_KEY = 'shikdan_blacklist_cat';
+const BLACKLIST_KW_KEY  = 'shikdan_blacklist_kw';
 
 let currentDate  = toDateStr(new Date());
 let activeFilter = 'all';  // 'all' | 'meal:아침'
@@ -32,10 +33,15 @@ function getBlacklist()       { return JSON.parse(localStorage.getItem(BLACKLIST
 function saveBlacklist(bl)    { localStorage.setItem(BLACKLIST_KEY, JSON.stringify(bl)); }
 function getCatBlacklist()    { return JSON.parse(localStorage.getItem(BLACKLIST_CAT_KEY) || '[]'); }
 function saveCatBlacklist(bl) { localStorage.setItem(BLACKLIST_CAT_KEY, JSON.stringify(bl)); }
+function getKwBlacklist()     { return JSON.parse(localStorage.getItem(BLACKLIST_KW_KEY)  || '[]'); }
+function saveKwBlacklist(bl)  { localStorage.setItem(BLACKLIST_KW_KEY,  JSON.stringify(bl)); }
 function isBlacklisted(id) {
   if (getBlacklist().includes(id)) return true;
   const food = FOODS_DB.find(f => f.id === id);
-  return food ? getCatBlacklist().includes(food.category) : false;
+  if (!food) return false;
+  if (getCatBlacklist().includes(food.category)) return true;
+  const name = food.name.toLowerCase();
+  return getKwBlacklist().some(kw => name.includes(kw.toLowerCase()));
 }
 function toggleBlacklist(id) {
   let bl = getBlacklist();
@@ -48,6 +54,15 @@ function toggleCatBlacklist(cat) {
   if (bl.includes(cat)) bl = bl.filter(x => x !== cat);
   else bl.push(cat);
   saveCatBlacklist(bl);
+}
+function addKwBlacklist(kw) {
+  kw = kw.trim();
+  if (!kw) return;
+  let bl = getKwBlacklist();
+  if (!bl.includes(kw)) { bl.push(kw); saveKwBlacklist(bl); }
+}
+function removeKwBlacklist(kw) {
+  saveKwBlacklist(getKwBlacklist().filter(x => x !== kw));
 }
 
 // ── 영양 계산 ─────────────────────────────
@@ -387,7 +402,7 @@ function renderFoodList() {
       }).join('');
 }
 
-let blTab = 'food'; // 'food' | 'category'
+let blTab = 'food'; // 'food' | 'category' | 'keyword'
 let blCatFilter = ''; // 개별 음식 탭 카테고리 필터
 
 function openBlacklistModal() {
@@ -409,6 +424,7 @@ function renderBlacklist() {
     <div class="bl-tabs">
       <button class="bl-tab${blTab==='food'?' active':''}" onclick="switchBlTab('food')">개별 음식</button>
       <button class="bl-tab${blTab==='category'?' active':''}" onclick="switchBlTab('category')">카테고리</button>
+      <button class="bl-tab${blTab==='keyword'?' active':''}" onclick="switchBlTab('keyword')">키워드</button>
     </div>`;
 
   if (blTab === 'food') {
@@ -432,7 +448,7 @@ function renderBlacklist() {
           </div>`).join('')
       : '<div style="text-align:center;padding:32px;color:#a0aec0">차단된 음식이 없습니다</div>';
     body.innerHTML = tabHtml + filterHtml + listHtml;
-  } else {
+  } else if (blTab === 'category') {
     const cats = [...new Set(FOODS_DB.map(f => f.category))].sort();
     const catBl = getCatBlacklist();
     const listHtml = cats.map(cat => {
@@ -448,6 +464,28 @@ function renderBlacklist() {
         </div>`;
     }).join('');
     body.innerHTML = tabHtml + '<div style="font-size:0.78rem;color:#a0aec0;padding:6px 2px 10px">카테고리 차단 시 해당 카테고리의 모든 음식이 검색에서 제외됩니다.</div>' + listHtml;
+  } else if (blTab === 'keyword') {
+    const kwBl = getKwBlacklist();
+    const kwListHtml = kwBl.length
+      ? kwBl.map(kw => {
+          const count = FOODS_DB.filter(f => f.name.toLowerCase().includes(kw.toLowerCase())).length;
+          return `
+            <div class="foodlist-row blocked">
+              <div class="foodlist-info" style="flex:1">
+                <span class="foodlist-name">"${esc(kw)}"</span>
+                <span class="foodlist-cat">${count}개 음식 해당</span>
+              </div>
+              <button class="bl-btn bl-on" onclick="removeKwBlacklist('${esc(kw)}');renderBlacklist()" title="해제">🚫</button>
+            </div>`;
+        }).join('')
+      : '<div style="text-align:center;padding:24px;color:#a0aec0">차단된 키워드가 없습니다</div>';
+    body.innerHTML = tabHtml +
+      `<div style="font-size:0.78rem;color:#a0aec0;padding:6px 2px 8px">이름에 키워드가 포함된 모든 음식이 검색에서 제외됩니다.</div>
+       <div class="bl-kw-input-row">
+         <input id="bl-kw-input" class="bl-kw-input" type="text" placeholder="키워드 입력 (예: 튀김, 라면...)"
+           onkeydown="if(event.key==='Enter'){addKwBlacklist(this.value);this.value='';renderBlacklist()}" />
+         <button class="bl-kw-add-btn" onclick="addKwBlacklist(document.getElementById('bl-kw-input').value);document.getElementById('bl-kw-input').value='';renderBlacklist()">추가</button>
+       </div>` + kwListHtml;
   }
 }
 
