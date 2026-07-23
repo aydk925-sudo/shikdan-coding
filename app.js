@@ -489,6 +489,131 @@ function renderBlacklist() {
   }
 }
 
+// ── 자동 식단 생성 ───────────────────────
+const MEAL_CAT = {
+  '아침': ['곡류','빵','빵·과자','유제품','달걀·콩','과일','간식'],
+  '점심': ['한식','중식','일식','양식','분식','육류','해산물','반찬','곡류'],
+  '저녁': ['한식','중식','일식','양식','육류','해산물','반찬','곡류'],
+  '간식': ['과일','간식','빵·과자','과자','유제품','음료'],
+};
+const MEAL_RATIO = { '아침': 0.25, '점심': 0.35, '저녁': 0.30, '간식': 0.10 };
+
+let apPlan = []; // [{ meal, food, grams }, ...]
+
+function openAutoPlanModal() {
+  document.getElementById('autoplan-result').style.display = 'none';
+  document.getElementById('autoplan-settings').style.display = 'block';
+  document.getElementById('autoplan-modal').style.display = 'flex';
+}
+function closeAutoPlanModal(e) {
+  if (!e || e.target.classList.contains('modal-backdrop') || e.target.classList.contains('modal-close')) {
+    document.getElementById('autoplan-modal').style.display = 'none';
+  }
+}
+
+function pickFood(meal, excludeIds) {
+  const cats = MEAL_CAT[meal];
+  const available = FOODS_DB.filter(f =>
+    !isBlacklisted(f.id) &&
+    !excludeIds.includes(f.id) &&
+    cats.includes(f.category) &&
+    f.nutrients.cal > 0
+  );
+  if (!available.length) return null;
+  return available[Math.floor(Math.random() * available.length)];
+}
+
+function gramsForCal(food, targetCal) {
+  const calPer100 = food.nutrients.cal;
+  if (!calPer100) return 100;
+  return Math.min(500, Math.max(50, Math.round(targetCal / calPer100 * 100 / 10) * 10));
+}
+
+function generateAutoPlan() {
+  const totalCal = parseInt(document.getElementById('ap-cal').value) || 2000;
+  const meals = ['아침','점심','저녁','간식'].filter(m =>
+    document.getElementById('ap-' + {아침:'breakfast',점심:'lunch',저녁:'dinner',간식:'snack'}[m]).checked
+  );
+  if (!meals.length) { alert('식사 시간을 하나 이상 선택하세요.'); return; }
+
+  apPlan = [];
+  const usedIds = [];
+  for (const meal of meals) {
+    const targetCal = Math.round(totalCal * MEAL_RATIO[meal]);
+    // 주식 + 부식(칼로리가 낮은 식사엔 1개만)
+    const mainFood = pickFood(meal, usedIds);
+    if (!mainFood) continue;
+    usedIds.push(mainFood.id);
+    const mainGrams = gramsForCal(mainFood, targetCal * 0.7);
+    apPlan.push({ meal, food: mainFood, grams: mainGrams });
+
+    if (targetCal >= 300 && ['아침','점심','저녁'].includes(meal)) {
+      const sideFood = pickFood(meal, usedIds);
+      if (sideFood) {
+        usedIds.push(sideFood.id);
+        const sideGrams = gramsForCal(sideFood, targetCal * 0.3);
+        apPlan.push({ meal, food: sideFood, grams: sideGrams });
+      }
+    }
+  }
+  renderAutoPlan();
+}
+
+function regenItem(idx) {
+  const item = apPlan[idx];
+  const usedIds = apPlan.filter((_, i) => i !== idx).map(p => p.food.id);
+  const newFood = pickFood(item.meal, usedIds);
+  if (!newFood) return;
+  const totalCal = parseInt(document.getElementById('ap-cal').value) || 2000;
+  const targetCal = Math.round(totalCal * MEAL_RATIO[item.meal]) * (apPlan.filter(p=>p.meal===item.meal).length > 1 ? 0.4 : 0.7);
+  apPlan[idx] = { meal: item.meal, food: newFood, grams: gramsForCal(newFood, targetCal) };
+  renderAutoPlan();
+}
+
+function renderAutoPlan() {
+  const totalCal = apPlan.reduce((s, p) => s + Math.round(calcNutrients(p.food, p.grams).cal), 0);
+  const meals = [...new Set(apPlan.map(p => p.meal))];
+  const mealEmoji = { '아침':'🌅','점심':'☀️','저녁':'🌙','간식':'🍪' };
+
+  const html = meals.map(meal => {
+    const items = apPlan.filter(p => p.meal === meal);
+    const mealCal = items.reduce((s, p) => s + Math.round(calcNutrients(p.food, p.grams).cal), 0);
+    const rows = items.map((p, _) => {
+      const idx = apPlan.indexOf(p);
+      const cal = Math.round(calcNutrients(p.food, p.grams).cal);
+      return `
+        <div class="ap-item">
+          <span class="ap-item-emoji">${p.food.emoji}</span>
+          <div class="ap-item-info">
+            <span class="ap-item-name">${esc(p.food.name)}</span>
+            <span class="ap-item-meta">${p.grams}g · ${cal}kcal</span>
+          </div>
+          <button class="ap-regen-btn" onclick="regenItem(${idx})" title="다시 추천">🔄</button>
+        </div>`;
+    }).join('');
+    return `
+      <div class="ap-meal-group">
+        <div class="ap-meal-header">${mealEmoji[meal]} ${meal} <span class="ap-meal-cal">${mealCal}kcal</span></div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  document.getElementById('ap-result-list').innerHTML = html;
+  document.getElementById('ap-total-cal').textContent = `총 ${totalCal}kcal`;
+  document.getElementById('autoplan-settings').style.display = 'none';
+  document.getElementById('autoplan-result').style.display = 'flex';
+}
+
+function applyAutoPlan() {
+  const log = getLog();
+  for (const p of apPlan) {
+    log.push({ date: currentDate, meal: p.meal, foodId: p.food.id, grams: p.grams });
+  }
+  saveLog(log);
+  document.getElementById('autoplan-modal').style.display = 'none';
+  renderAll();
+}
+
 // ── 레시피 모달 ──────────────────────────
 function openRecipeModal(foodName) {
   const recipe = RECIPES[foodName];

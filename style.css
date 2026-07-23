@@ -87,6 +87,8 @@ body {
   transition: all 0.2s;
 }
 .add-folder-btn:hover { border-color: #667eea; color: #667eea; }
+.auto-plan-btn { border-color: #9f7aea !important; color: #9f7aea !important; }
+.auto-plan-btn:hover { border-color: #805ad5 !important; color: #805ad5 !important; background: rgba(159,122,234,0.08) !important; }
 
 /* ── 메인 ── */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -721,3 +723,119 @@ body {
   color: #a0aec0;
   font-size: 0.9rem;
 }
+
+/* ── 자동 식단 생성 모달 ─────────────────────── */
+.autoplan-modal {
+  width: 480px;
+  max-width: 95vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.autoplan-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 20px;
+}
+.autoplan-settings { display: flex; flex-direction: column; gap: 16px; }
+.autoplan-row { display: flex; flex-direction: column; gap: 8px; }
+.autoplan-row > label { font-size: 0.85rem; font-weight: 600; color: #4a5568; }
+.autoplan-cal-input { display: flex; align-items: center; gap: 8px; }
+.autoplan-cal-input input {
+  width: 110px;
+  padding: 8px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3748;
+  text-align: center;
+}
+.autoplan-cal-input span { color: #718096; font-size: 0.9rem; }
+.autoplan-meals { display: flex; gap: 14px; flex-wrap: wrap; }
+.ap-meal-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.88rem;
+  color: #4a5568;
+  cursor: pointer;
+}
+.ap-meal-check input { cursor: pointer; accent-color: #9f7aea; width: 15px; height: 15px; }
+.ap-generate-btn {
+  margin-top: 8px;
+  padding: 11px;
+  background: linear-gradient(135deg, #9f7aea, #667eea);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.ap-generate-btn:hover { opacity: 0.9; }
+
+#autoplan-result { flex-direction: column; gap: 12px; overflow: hidden; }
+#ap-result-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.ap-meal-group {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ap-meal-header {
+  background: #f7fafc;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ap-meal-cal { margin-left: auto; color: #9f7aea; font-weight: 700; }
+.ap-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid #f0f4f8;
+}
+.ap-item-emoji { font-size: 1.3rem; flex-shrink: 0; }
+.ap-item-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.ap-item-name { font-size: 0.9rem; font-weight: 600; color: #2d3748; }
+.ap-item-meta { font-size: 0.78rem; color: #a0aec0; }
+.ap-regen-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.5;
+  padding: 4px;
+  border-radius: 6px;
+  transition: opacity 0.15s, background 0.15s;
+}
+.ap-regen-btn:hover { opacity: 1; background: #f0f4f8; }
+.ap-result-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+  border-top: 1.5px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.ap-total-cal { font-size: 1rem; font-weight: 700; color: #9f7aea; }
+.ap-apply-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #9f7aea, #667eea);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.ap-apply-btn:hover { opacity: 0.9; }
